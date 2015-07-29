@@ -5,7 +5,7 @@
   "main": "lib/index.js",
   "scripts": {
     "test": "gulp test",
-    "scripts": "node scripts/install"
+    "install": "node scripts/install"
   },
   "repository": {
     "type": "git",
