@@ -43,6 +43,7 @@
     "bindings": "^1.2.1",
     "chai": "^3.2.0",
     "nan": "^1.8.4",
+    "native-builder": "git://github.com/nachos/native-builder",
     "q": "^1.4.1",
     "which-native-nodish": "^1.1.1"
   }
