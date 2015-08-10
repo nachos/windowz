@@ -9,21 +9,20 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://github.com/nachos/node-windows-manager"
+    "url": "https://github.com/nachos/windowz"
   },
   "keywords": [
-    "node",
     "windows",
-    "manager",
+    "ui",
     "nachos",
     "native"
   ],
   "author": "Nachos team",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/nachos/node-windows-manager/issues"
+    "url": "https://github.com/nachos/windowz/issues"
   },
-  "homepage": "https://github.com/nachos/node-windows-manager",
+  "homepage": "https://github.com/nachos/windowz",
   "devDependencies": {
     "git-validate": "^2.0.3",
     "gulp": "^3.9.0",
