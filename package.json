@@ -1,5 +1,5 @@
 {
-  "name": "windows-manager",
+  "name": "windowz",
   "version": "1.0.0",
   "description": "A cross-platform windows manager written in Node.js",
   "main": "lib/index.js",
