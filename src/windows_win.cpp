@@ -155,14 +155,6 @@ NAN_METHOD(Close) {
   ShowWindow(hwnd, SW_HIDE);
 }
 
-NAN_METHOD(Restore) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
-
-  ShowWindow(hwnd, SW_RESTORE);
-}
-
 NAN_METHOD(SetToForeground) {
   NanScope();
 
@@ -213,9 +205,6 @@ void init(Handle<Object> exports) {
 
   exports->Set(NanNew<String>("activate"),
     NanNew<FunctionTemplate>(Activate)->GetFunction());
-
-  exports->Set(NanNew<String>("restore"),
-    NanNew<FunctionTemplate>(Restore)->GetFunction());
 
   exports->Set(NanNew<String>("show"),
     NanNew<FunctionTemplate>(Show)->GetFunction());
