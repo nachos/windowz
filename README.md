@@ -1,40 +1,130 @@
-# native-api [![Build Status](https://travis-ci.org/nachos/native-api.svg?branch=master)](https://travis-ci.org/nachos/native-api)[![Build status](https://ci.appveyor.com/api/projects/status/vm8870gdn3c4j14b?svg=true)](https://ci.appveyor.com/project/noamokman/native-api)
+# windowz
 
-Cross-platform OS API with native modules.
+Windowz is a tool to handle os windows
 
+<table>
+  <thead>
+    <tr>
+      <th>Linux</th>
+      <th>OSX</th>
+      <th>Windows</th>
+      <th>Coverage</th>
+      <th>Dependencies</th>
+      <th>DevDependencies</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td colspan="2" align="center">
+        <a href="https://travis-ci.org/nachos/windowz"><img src="https://img.shields.io/travis/nachos/windowz.svg?style=flat-square"></a>
+      </td>
+      <td align="center">
+        <a href="https://ci.appveyor.com/project/nachos/windowz"><img src="https://img.shields.io/appveyor/ci/nachos/windowz.svg?style=flat-square"></a>
+      </td>
+      <td align="center">
+<a href='https://coveralls.io/r/nachos/windowz'><img src='https://img.shields.io/coveralls/nachos/windowz.svg?style=flat-square' alt='Coverage Status' /></a>
+      </td>
+      <td align="center">
+        <a href="https://david-dm.org/nachos/windowz"><img src="https://img.shields.io/david/nachos/windowz.svg?style=flat-square"></a>
+      </td>
+      <td align="center">
+        <a href="https://david-dm.org/nachos/windowz#info=devDependencies"><img src="https://img.shields.io/david/dev/nachos/windowz.svg?style=flat-square"/></a>
+      </td>
+    </tr>
+  </tbody>
+</table>
 
-## Install
+## Have a problem? Come chat with us!
+[![Join the chat at https://gitter.im/nachos/windowz](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/nachos/windowz?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
 
-```bash
-$ npm install --save native-api
+## Installation
+``` bash
+  $ [sudo] npm install windowz --save
 ```
 
-
-## Usage
-
-```javascript
-var nativeApi = require('native-api');
-var process = nativeApi.process;
-var file = nativeApi.file;
-var path = nativeApi.path;
-var screen = nativeApi.screen;
-
-var processes = process.getAllProcesses();
-var fileStats = file.getFileStats('c:\test.txt');
-var userHome = path.getUserHome();
-var screens = screen.getAllScreens();
+## Examples
+### Initialize
+``` js
+var windowz = require('windowz');
 ```
 
-## API
+### getAll
+Get a list of all opened windows
+``` js
+var windows = windowz.getAll();
+```
 
-_(Coming soon)_
+### getTitle(windowHandle)
+Get the title of a window
+``` js
+var title = windowz.getTitle(windowHandle);
+```
 
+### setToForeground(windowHandle)
+Set a window to foreground
+``` js
+windowz.setToForeground(windowHandle);
+```
+  
+### minimize(windowHandle)
+Minimize a given window
+``` js
+windowz.minimize(windowHandle);
+```
 
-## Contributing
+### maximize(windowHandle)
+Maximize a given window
+``` js
+windowz.maximize(windowHandle);
+```
 
-In lieu of a formal styleguide, take care to maintain the existing coding style. Add unit tests for any new or changed functionality. Lint and test your code using [gulp](http://gulpjs.com/).
+### activate(windowHandle)
+Activate a given window
+``` js
+windowz.activate(windowHandle);
+```
 
+### show(windowHandle)
+Show a given window
+``` js
+windowz.show(windowHandle);
+```
+
+### isForeground(windowHandle)
+Returns if the window is the foreground window
+``` js
+var isForeground = windowz.isForeground(windowHandle);
+```
+
+### isMinimized(windowHandle)
+Returns if the window is minimized
+``` js
+var isMinimized = windowz.isMinimized(windowHandle);
+```
+
+### setTopMost(windowHandle)
+Sets the window to top most
+``` js
+windowz.setTopMost(windowHandle);
+```
+
+### setToForeground(windowHandle)
+Sets the window to the foreground
+``` js
+windowz.setToForeground(windowHandle);
+```
+
+### close(windowHandle)
+Closes the given window
+``` js
+windowz.close(windowHandle);
+```
+  
+## Run Tests
+``` bash
+  $ npm test
+```
 
 ## License
 
-Copyright (c) 2015. Licensed under the MIT license.
+[MIT](LICENSE)
