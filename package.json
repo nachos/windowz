@@ -40,6 +40,6 @@
     "bindings": "^1.2.1",
     "chai": "^3.2.0",
     "nan": "^1.8.4",
-    "native-builder": "git://github.com/nachos/native-builder"
+    "native-builder": "^1.0.0"
   }
 }
