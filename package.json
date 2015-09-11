@@ -7,6 +7,9 @@
     "test": "gulp test",
     "install": "native-builder build"
   },
+  "pre-commit": [
+    "lint"
+  ],
   "repository": {
     "type": "git",
     "url": "https://github.com/nachos/windowz"
@@ -33,6 +36,7 @@
     "gulp-mocha": "^2.1.3",
     "jshint-stylish": "^2.0.1",
     "lazypipe": "^1.0.1",
+    "jscs-nachos": "^1.0.1",
     "run-sequence": "^1.1.2"
   },
   "dependencies": {
