@@ -17,18 +17,32 @@
 
 #include <iostream>
 #include <fstream>
+
 using namespace std;
 
-using namespace v8;
-using namespace node;
+using v8::Local;
+using v8::FunctionTemplate;
+using v8::Number;
+using v8::Handle;
+using v8::Object;
+using v8::String;
+using v8::Array;
+
+using Nan::GetFunction;
+using Nan::New;
+using Nan::Set;
+using Nan::True;
+using Nan::False;
+using Nan::Export;
+
+#define WINDOWZ_HANDLE(name) HWND name = (HWND)info[0]->Uint32Value();
 
 BOOL IsTaskbarWindow(HWND hwnd) {
   if (IsWindowVisible(hwnd) && GetParent(hwnd) == 0) {
     bool bNoOwner = (GetWindow(hwnd, GW_OWNER) == 0);
     int lExStyle = GetWindowLong(hwnd, GWL_EXSTYLE);
     if (!bNoOwner) return FALSE;
-    if ((((lExStyle & WS_EX_TOOLWINDOW) == 0)))
-    {
+    if ((((lExStyle & WS_EX_TOOLWINDOW) == 0))) {
         return TRUE;
     }
   }
@@ -42,30 +56,28 @@ BOOL CALLBACK EnumWindowsProc(HWND hwnd, LPARAM lParam) {
   }
 
   std::list<Local<Object>> *windows = (std::list<Local<Object>>*)lParam;
-  Local<Object> obj = NanNew<Object>();
+  Local<Object> obj = New<Object>();
 
   DWORD processID;
   char title[1024];
   DWORD threadID = GetWindowThreadProcessId(hwnd, &processID);
   GetWindowText(hwnd, title, sizeof(title));
 
-  obj->Set(NanNew<String>("threadID"), NanNew<Number>((unsigned int)threadID));
-  obj->Set(NanNew<String>("processID"), NanNew<Number>((unsigned int)processID));
-  obj->Set(NanNew<String>("handle"), NanNew<Number>((unsigned int)hwnd));
-  obj->Set(NanNew<String>("title"), NanNew<String>(title));
+  Set(obj, New<String>("threadID").ToLocalChecked(), New<Number>((unsigned int)threadID));
+  Set(obj, New<String>("processID").ToLocalChecked(), New<Number>((unsigned int)processID));
+  Set(obj, New<String>("handle").ToLocalChecked(), New<Number>((unsigned int)hwnd));
+  Set(obj, New<String>("title").ToLocalChecked(), New<String>(title).ToLocalChecked());
 
   (*windows).push_back(obj);
   return TRUE;
 }
 
-NAN_METHOD(GetAll) {
-  NanScope();
-
+NAN_METHOD(getAll) {
   std::list<Local<Object>> windows;
 
   EnumWindows(EnumWindowsProc, (LPARAM)&windows);
 
-  Local<Array> returnValue = NanNew<Array>();
+  Local<Array> returnValue = New<Array>();
 
   int i = 0;
   for (std::list<Local<Object>>::iterator it=windows.begin(); it != windows.end(); ++it) {
@@ -73,106 +85,90 @@ NAN_METHOD(GetAll) {
       i++;
   }
 
-  NanReturnValue(returnValue);
+  info.GetReturnValue().Set(returnValue);
 }
 
-NAN_METHOD(GetCurrent) {
-  NanScope();
+NAN_METHOD(getCurrent) {
+  Local<Object> returnValue = New<Object>();
 
-  Local<Object> returnValue = NanNew<Object>();
+  Set(returnValue, New<String>("processID").ToLocalChecked(), New<Number>((unsigned int)  GetCurrentProcessId()));
 
-  returnValue->Set(NanNew<String>("processID"), NanNew<Number>((unsigned int)  GetCurrentProcessId()));
-
-  NanReturnValue(returnValue);
+  info.GetReturnValue().Set(returnValue);
 }
 
-NAN_METHOD(GetTitle) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(getTitle) {
+  WINDOWZ_HANDLE(hwnd)
 
   char title[1024];
   GetWindowText(hwnd, title, sizeof(title));
 
-  NanReturnValue(NanNew<String>(title));
+  info.GetReturnValue().Set(New<String>(title).ToLocalChecked());
   // If hebrew is not working
-  //NanReturnValue(NanNew(*NanAsciiString(title)));
+  //NanReturnValue(New(*NanAsciiString(title)));
 }
 
-NAN_METHOD(Minimize) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(minimize) {
+  WINDOWZ_HANDLE(hwnd)
 
   ShowWindow(hwnd, SW_MINIMIZE);
 }
 
-NAN_METHOD(Show) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(show) {
+  WINDOWZ_HANDLE(hwnd)
 
   ShowWindow(hwnd, SW_SHOW);
 }
 
-NAN_METHOD(Maximize) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(maximize) {
+  WINDOWZ_HANDLE(hwnd)
 
   ShowWindow(hwnd, SW_MAXIMIZE);
 }
 
-NAN_METHOD(IsForeground) {
-  NanScope();
+NAN_METHOD(isForeground) {
+  WINDOWZ_HANDLE(hwnd)
 
-  HWND hwnd = (HWND)args[0]->Uint32Value();
-
-  NanReturnValue(GetForegroundWindow() == hwnd ? NanTrue() : NanFalse());
+  info.GetReturnValue().Set(GetForegroundWindow() == hwnd ? True() : False());
 }
 
-NAN_METHOD(IsMinimized) {
-  NanScope();
+NAN_METHOD(isMinimized) {
+  WINDOWZ_HANDLE(hwnd)
 
-  HWND hwnd = (HWND)args[0]->Uint32Value();
-
-  NanReturnValue(IsIconic(hwnd) ? NanTrue() : NanFalse());
+  info.GetReturnValue().Set(IsIconic(hwnd) ? True() : False());
 }
 
-NAN_METHOD(SetTopMost) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(setTopMost) {
+  WINDOWZ_HANDLE(hwnd)
 
   SetWindowPos(hwnd, HWND_TOPMOST, 0, 0, 0, 0, SWP_NOSIZE);
 }
 
-NAN_METHOD(Close) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(close) {
+  WINDOWZ_HANDLE(hwnd)
 
   ShowWindow(hwnd, SW_HIDE);
 }
 
-NAN_METHOD(SetToForeground) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(setToForeground) {
+  WINDOWZ_HANDLE(hwnd)
 
   ShowWindow(hwnd, 4);
   SetForegroundWindow(hwnd);
 }
 
-NAN_METHOD(Activate) {
-  NanScope();
-
-  HWND hwnd = (HWND)args[0]->Uint32Value();
+NAN_METHOD(activate) {
+  WINDOWZ_HANDLE(hwnd)
   int result;
 
   if (hwnd != GetForegroundWindow()) {
     DWORD lForeThreadID = GetWindowThreadProcessId(GetForegroundWindow(), NULL);
     DWORD lThisThreadID = GetWindowThreadProcessId(hwnd, NULL);
+
+    if (IsIconic(hwnd)) {
+      ShowWindow(hwnd, SW_RESTORE);
+    } else {
+      ShowWindow(hwnd, SW_SHOW);
+    }
 
     if (lForeThreadID != lThisThreadID) {
       AttachThreadInput(lForeThreadID, lThisThreadID, TRUE);
@@ -181,51 +177,38 @@ NAN_METHOD(Activate) {
     } else {
       result = SetForegroundWindow(hwnd);
     }
-
-    if (IsIconic(hwnd)) {
-      ShowWindow(hwnd, SW_RESTORE);
-    } else {
-      ShowWindow(hwnd, SW_SHOW);
-    }
   }
 }
 
-void init(Handle<Object> exports) {
-  exports->Set(NanNew<String>("getAll"),
-    NanNew<FunctionTemplate>(GetAll)->GetFunction());
+NAN_METHOD(setNoActivate) {
+  WINDOWZ_HANDLE(hwnd)
 
-  exports->Set(NanNew<String>("getTitle"),
-    NanNew<FunctionTemplate>(GetTitle)->GetFunction());
+  DWORD processID;
+  DWORD windowThread = GetWindowThreadProcessId(hwnd, &processID);
 
-  exports->Set(NanNew<String>("setToForeground"),
-    NanNew<FunctionTemplate>(SetToForeground)->GetFunction());
+  LONG_PTR style = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
 
-  exports->Set(NanNew<String>("minimize"),
-    NanNew<FunctionTemplate>(Minimize)->GetFunction());
+  SetLastError(0);
+  LONG_PTR result = SetWindowLongPtr(hwnd, GWL_EXSTYLE, style | WS_EX_NOACTIVATE);
+  int lastError = GetLastError();
 
-  exports->Set(NanNew<String>("activate"),
-    NanNew<FunctionTemplate>(Activate)->GetFunction());
+  info.GetReturnValue().Set(New<Number>(lastError));
+}
 
-  exports->Set(NanNew<String>("show"),
-    NanNew<FunctionTemplate>(Show)->GetFunction());
-
-  exports->Set(NanNew<String>("maximize"),
-    NanNew<FunctionTemplate>(Maximize)->GetFunction());
-
-  exports->Set(NanNew<String>("isForeground"),
-    NanNew<FunctionTemplate>(IsForeground)->GetFunction());
-
-  exports->Set(NanNew<String>("isMinimized"),
-    NanNew<FunctionTemplate>(IsMinimized)->GetFunction());
-
-  exports->Set(NanNew<String>("setTopMost"),
-    NanNew<FunctionTemplate>(SetTopMost)->GetFunction());
-
-  exports->Set(NanNew<String>("close"),
-    NanNew<FunctionTemplate>(Close)->GetFunction());
-
-  exports->Set(NanNew<String>("getCurrent"),
-    NanNew<FunctionTemplate>(GetCurrent)->GetFunction());
+NAN_MODULE_INIT(init) {
+  NAN_EXPORT(target, getAll);
+  NAN_EXPORT(target, getTitle);
+  NAN_EXPORT(target, setToForeground);
+  NAN_EXPORT(target, minimize);
+  NAN_EXPORT(target, activate);
+  NAN_EXPORT(target, show);
+  NAN_EXPORT(target, maximize);
+  NAN_EXPORT(target, isForeground);
+  NAN_EXPORT(target, isMinimized);
+  NAN_EXPORT(target, setTopMost);
+  NAN_EXPORT(target, close);
+  NAN_EXPORT(target, getCurrent);
+  NAN_EXPORT(target, setNoActivate);
 }
 
 NODE_MODULE(windows, init)
