@@ -36,6 +36,7 @@ using Nan::False;
 using Nan::Export;
 
 #define WINDOWZ_HANDLE(name) HWND name = (HWND)info[0]->Uint32Value();
+#define WINDOWZ_HANDLE2(name) HWND name = (HWND)info[1]->Uint32Value();
 
 BOOL IsTaskbarWindow(HWND hwnd) {
   if (IsWindowVisible(hwnd) && GetParent(hwnd) == 0) {
@@ -180,19 +181,101 @@ NAN_METHOD(activate) {
   }
 }
 
-NAN_METHOD(setNoActivate) {
-  WINDOWZ_HANDLE(hwnd)
+LRESULT CALLBACK MainWndProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+{
+	PAINTSTRUCT ps;
+	RECT rc;
+      HDC hdc;
+      TCHAR greeting[] = _T("Hello, World!");
 
-  DWORD processID;
-  DWORD windowThread = GetWindowThreadProcessId(hwnd, &processID);
+	switch (uMsg)
+	{
+	case WM_PAINT:
+          hdc = BeginPaint(hWnd, &ps);
+        GetClientRect(hWnd, &rc);
+                 SetBkColor(hdc, 0x000000ff); // red
+          // Here your application is laid out.
+          // For this introduction, we just print out "Hello, World!"
+          // in the top left corner.
+          TextOut(hdc,
+              5, 5,
+              greeting, _tcslen(greeting));
+          // End application specific layout section.
 
-  LONG_PTR style = GetWindowLongPtr(hwnd, GWL_EXSTYLE);
+          EndPaint(hWnd, &ps);
+          break;
+	case WM_NCRBUTTONDOWN:
+  	  break;
+	case WM_RBUTTONDOWN:
+	  break;
+	case WM_DESTROY:
+		PostQuitMessage(0);
+		break;
+	case WM_ACTIVATE:
+	case WM_ACTIVATEAPP:
+	case WM_SIZE:
+	case WM_NCCALCSIZE:
+	case WM_NCACTIVATE:
+	  return 0;
 
-  SetLastError(0);
-  LONG_PTR result = SetWindowLongPtr(hwnd, GWL_EXSTYLE, style | WS_EX_NOACTIVATE);
-  int lastError = GetLastError();
+	default:
+  //ostringstream stros;
+  //stros << uMsg;
+	//MessageBox(NULL, stros.str().c_str(), "asd2", MB_OK);
+		return DefWindowProc(hWnd, uMsg, wParam, lParam);
+	}
 
-  info.GetReturnValue().Set(New<Number>(lastError));
+	return 0;
+}
+
+NAN_METHOD(setParent) {
+  WINDOWZ_HANDLE(child)
+  WINDOWZ_HANDLE2(parent)
+
+  HWND result = SetParent(child, parent);
+
+  if (result == NULL) {
+    info.GetReturnValue().Set(New<Number>(GetLastError()));
+  } else {
+    info.GetReturnValue().Set(New<Number>((unsigned int) result));
+  }
+}
+
+NAN_METHOD(createDesktopWindow) {
+  HMODULE hInstance = GetModuleHandle(NULL);
+
+  WNDCLASS wc = {0};
+  wc.lpfnWndProc = (WNDPROC)MainWndProc;
+  wc.hInstance = hInstance;
+  wc.lpszClassName = "NachosDesktopWClass";
+  ATOM className = RegisterClass(&wc);
+
+  HWND hwnd = CreateWindowEx(
+    NULL, //WS_EX_TOOLWINDOW,
+    MAKEINTATOM(className),
+    "NachosDesktop",
+    WS_POPUP,
+    CW_USEDEFAULT,
+    CW_USEDEFAULT,
+    300,
+    200,
+    nullptr,
+    nullptr,
+    hInstance,
+    nullptr);
+
+      ShowWindow(hwnd, 4);
+          UpdateWindow(hwnd);
+
+
+MSG msg;
+    while (GetMessage(&msg, NULL, 0, 0) > 0)
+        {
+            TranslateMessage(&msg);
+            DispatchMessage(&msg);
+        }
+
+    info.GetReturnValue().Set(New<Number>((unsigned int)hwnd));
 }
 
 NAN_MODULE_INIT(init) {
@@ -208,7 +291,8 @@ NAN_MODULE_INIT(init) {
   NAN_EXPORT(target, setTopMost);
   NAN_EXPORT(target, close);
   NAN_EXPORT(target, getCurrent);
-  NAN_EXPORT(target, setNoActivate);
+  NAN_EXPORT(target, createDesktopWindow);
+  NAN_EXPORT(target, setParent);
 }
 
 NODE_MODULE(windows, init)
