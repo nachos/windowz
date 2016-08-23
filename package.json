@@ -1,6 +1,6 @@
 {
   "name": "windowz",
-  "version": "1.0.0",
+  "version": "0.0.0",
   "description": "A cross-platform windows manager written in Node.js",
   "main": "lib/index.js",
   "scripts": {
@@ -43,6 +43,6 @@
     "bindings": "^1.2.1",
     "chai": "^3.2.0",
     "nan": "^2.0.9",
-    "native-builder": "^1.0.1"
+    "native-builder": "^2.0.1"
   }
 }
